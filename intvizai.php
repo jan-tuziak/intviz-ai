@@ -85,6 +85,7 @@ function intvizai_process() {
     $req = [
         'headers' => [
             'Authorization' => 'Bearer ' . $api_key,
+            'Content-Type' => 'multipart/form-data'
         ],
         'body' => [
             'image' => curl_file_create($image_path, 'image/png', 'image.png'),
