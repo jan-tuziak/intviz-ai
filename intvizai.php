@@ -93,7 +93,7 @@ function intvizai_process() {
             'size' => '1024x1024'
         ],
         'timeout' => 60
-    ]
+    ];
     
     $response = wp_remote_post('https://api.openai.com/v1/images/edits', $req);
 
