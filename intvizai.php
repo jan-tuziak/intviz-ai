@@ -6,10 +6,6 @@ Version: 1.0
 Author: Jan Tuziak
 */
 
-function mylog($txt) {
-    file_put_contents('/home/klient.dhosting.pl/educkdesign/sandbox123.educk.pl/public_html/wp-content/plugins/intvizai/logs/mylog.txt', $txt.PHP_EOL , FILE_APPEND | LOCK_EX);
-}
-
 add_shortcode('intvizai', 'intvizai_shortcode');
 
 function intvizai_shortcode() {
@@ -99,11 +95,7 @@ function intvizai_process() {
         'timeout' => 60
     ]
     
-    mylog('Wysyłam do API:');
-    mylog(print_r($req, true));
     $response = wp_remote_post('https://api.openai.com/v1/images/edits', $req);
-    mylog('Odpowiedź z API:');
-    mylog(print_r($response, true));
 
     if (is_wp_error($response)) {
         wp_send_json_error(['message' => 'Błąd połączenia z OpenAI.']);
