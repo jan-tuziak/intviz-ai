@@ -99,13 +99,13 @@ function intvizai_process() {
     $response = wp_remote_post('https://api.openai.com/v1/images/edits', $req);
 
     if (is_wp_error($response)) {
-        wp_send_json_error(['message' => 'Błąd połączenia z OpenAI.']);
+        wp_send_json_error(['message' => 'Błąd połączenia z OpenAI. ' . print_r($body, true)]);
     }
 
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
     if (!isset($body['data'][0]['b64_json'])) {
-        wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.']);
+        wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.' . print_r($body, true)]);
     }
 
     // Zwiększ licznik i zapisz
