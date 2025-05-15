@@ -81,7 +81,8 @@ function intvizai_process() {
     }    
 
     $image_path_original  = $_FILES['image']['tmp_name'];
-    $image_path = convert_image_to_openai_png($image_path_original);
+    // $image_path = convert_image_to_openai_png($image_path_original);
+    $image_path = $image_path_original;
     
     $ch = curl_init();
    
@@ -96,8 +97,6 @@ function intvizai_process() {
             'image' => new CURLFile($image_path, 'image/png', 'image.png'),
             'prompt' => 'Generate a photorealistic visualization of the attached image. The result image should match the attached image exactly.',
             'n' => 1,
-            'size' => '1024x1024',
-            'response_format' => 'b64_json',
             'model' => 'gpt-image-1',
             'quality' => 'high'
         ],
