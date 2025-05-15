@@ -42,7 +42,7 @@ function intvizai_shortcode() {
                 <a href="data:image/png;base64,${data.image_base64}" download="intvizai_result.png">Pobierz obraz</a>
             `;
         } else {
-            document.getElementById('intvizai-result').textContent = 'Błąd: ' + data.message;
+            document.getElementById('intvizai-result').textContent = 'Błąd: ' + data.data.message;
         }
     });
     </script>
