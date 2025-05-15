@@ -93,10 +93,9 @@ function intvizai_process() {
         ],
         CURLOPT_POSTFIELDS => [
             'image' => curl_file_create($image_path, 'image/png', 'image.png'),
-            'prompt' => 'Make it hyper-realistic, suitable for interior design portfolio.',
+            'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
             'n' => 1,
-            'size' => '1024x1024',
-            'response_format' => 'b64_json'
+            'size' => '1024x1024'
         ]
     ]);
 
