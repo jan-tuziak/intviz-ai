@@ -128,7 +128,12 @@ function intvizai_process() {
         $meta['count'] += 1;
         update_user_meta($user_id, 'intvizai_count', $meta);
     
-        wp_send_json_success(['image_base64' => $data['data'][0]['b64_json']]);
+        wp_send_json([
+            'success' => true,
+            'data' => [
+                'image_base64' => $data['data'][0]['b64_json']
+            ]
+        ], 200, JSON_UNESCAPED_SLASHES);
     }
 }
 
