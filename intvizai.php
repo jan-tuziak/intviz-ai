@@ -108,12 +108,14 @@ function intvizai_process() {
     }
     
     $body .= '--' . $boundary . '--' . $eol;
+
+    $headers = [
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+    ];
     
     $response = wp_remote_post('https://api.openai.com/v1/images/edits', [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $api_key,
-            'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
-        ],
+        'headers' => $headers,
         'body' => $body,
         'timeout' => 60,
     ]);
@@ -125,6 +127,16 @@ function intvizai_process() {
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
 
+    error_log('OpenAI Request Headers:');
+    error_log(print_r($headers, true));
+
+    error_log('OpenAI Request Body:');
+    error_log(print_r($body, true));
+
+    error_log('OpenAI Response:');
+    error_log(print_r($response, true));
+
+    error_log('OpenAI Response Body:');
     error_log(print_r($data, true));
 
     if (!isset($data['data'][0]['b64_json'])) {
