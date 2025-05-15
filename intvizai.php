@@ -81,63 +81,62 @@ function intvizai_process() {
     }    
 
     $image_path = $_FILES['image']['tmp_name'];
-    $image_data = file_get_contents($image_path);
+    
+    require_once ABSPATH . WPINC . '/class-requests.php'; // tylko jeśli poza WordPressem
+
     $api_key = OPENAI_API_KEY;
     
-    // Tworzymy "ręczne" multipart body
-    $boundary = wp_generate_password(24, false);
-    $eol = "\r\n";
-    
-    $body = '';
-    $body .= '--' . $boundary . $eol;
-    $body .= 'Content-Disposition: form-data; name="image"; filename="image.png"' . $eol;
-    $body .= 'Content-Type: image/png' . $eol . $eol;
-    $body .= $image_data . $eol;
-    
-    $fields = [
-        'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
-        'n' => '1',
-        'size' => '1024x1024',
-        'response_format' => 'b64_json'
+    $body = [
+        [
+            'name' => 'image',
+            'filename' => 'image.png',
+            'type' => 'image/png',
+            'contents' => file_get_contents($image_path)
+        ],
+        [
+            'name' => 'prompt',
+            'contents' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.'
+        ],
+        [
+            'name' => 'n',
+            'contents' => '1'
+        ],
+        [
+            'name' => 'size',
+            'contents' => '1024x1024'
+        ],
+        [
+            'name' => 'response_format',
+            'contents' => 'b64_json'
+        ]
     ];
     
-    foreach ($fields as $name => $value) {
-        $body .= '--' . $boundary . $eol;
-        $body .= 'Content-Disposition: form-data; name="' . $name . '"' . $eol . $eol;
-        $body .= $value . $eol;
-    }
+    $response = Requests::request(
+        'https://api.openai.com/v1/images/edits',
+        [
+            'Authorization' => 'Bearer ' . $api_key
+        ],
+        $body,
+        'POST',
+        [
+            'type' => 'multipart',
+            'timeout' => 60
+        ]
+    );
     
-    $body .= '--' . $boundary . '--' . $eol;
-
-    $headers = [
-        'Authorization' => 'Bearer ' . $api_key,
-        'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
-    ];
+    $data = json_decode($response->body, true);
     
-    $response = wp_remote_post('https://api.openai.com/v1/images/edits', [
-        'headers' => $headers,
-        'body' => $body,
-        'timeout' => 60,
-    ]);
-    
-    if (is_wp_error($response)) {
-        wp_send_json_error(['message' => 'Błąd połączenia', 'debug' => $response->get_error_message()]);
-    }
-
-    error_log('####################### OpenAI Request Headers: #######################');
-    error_log(print_r($headers, true));
-
-    error_log('####################### OpenAI Request Body: #######################');
-    error_log(print_r($body, true));
-    
-    $data = json_decode(wp_remote_retrieve_body($response), true);
-
-    error_log('####################### OpenAI Response: #######################');
-    error_log(print_r($response, true));
-
     if (!isset($data['data'][0]['b64_json'])) {
+        error_log('####################### OpenAI Request Body: #######################');
+        error_log(print_r($body, true));
+    
+        error_log('####################### OpenAI Response: #######################');
+        error_log(print_r($response, true));
+        
         wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.', 'debug' => $data]);
     }
+    
+    wp_send_json_success(['image_base64' => $data['data'][0]['b64_json']]);
 
     // Zwiększ licznik i zapisz
     $meta['count'] += 1;
