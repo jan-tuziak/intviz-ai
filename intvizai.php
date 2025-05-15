@@ -82,30 +82,42 @@ function intvizai_process() {
 
     $image_path = $_FILES['image']['tmp_name'];
 
-    $ch = curl_init();
-
-    curl_setopt_array($ch, [
-        CURLOPT_URL => 'https://api.openai.com/v1/images/edits',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => [
-            "Authorization: Bearer $api_key"
-        ],
-        CURLOPT_POSTFIELDS => [
-            'image' => curl_file_create($image_path, 'image/png', 'image.png'),
-            'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
-            'n' => 1,
-            'size' => '1024x1024'
-        ]
-    ]);
-
-    $response = curl_exec($ch);
-    $err = curl_error($ch);
-    curl_close($ch);
-
-    if ($err) {
-        wp_send_json_error(['message' => 'Błąd cURL: ' . $err]);
-    }
+    $body = [
+      [
+        'name' => 'image',
+        'filename' => 'image.png',
+        'type' => 'image/png',
+        'contents' => file_get_contents($image_path)
+      ],
+      [
+        'name' => 'prompt',
+        'contents' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.'
+      ],
+      [
+        'name' => 'n',
+        'contents' => '1'
+      ],
+      [
+        'name' => 'size',
+        'contents' => '1024x1024'
+      ],
+      [
+        'name' => 'response_format',
+        'contents' => 'b64_json'
+      ]
+    ];
+    
+    $response = Requests::request(
+      'https://api.openai.com/v1/images/edits',
+      [
+        'Authorization' => 'Bearer ' . OPENAI_API_KEY
+      ],
+      $body,
+      'POST',
+      [
+        'type' => 'multipart'
+      ]
+    );
     
     $data = json_decode($response, true);
 
