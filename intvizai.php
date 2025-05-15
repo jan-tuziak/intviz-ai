@@ -98,7 +98,8 @@ function intvizai_process() {
             'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
             'n' => 1,
             'size' => '1024x1024',
-            'response_format' => 'b64_json'
+            'response_format' => 'b64_json',
+            'model' => 'dall-e-2'
         ],
         CURLOPT_TIMEOUT => 60,
     ];
