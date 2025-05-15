@@ -80,14 +80,8 @@ function intvizai_process() {
         wp_send_json_error(['message' => 'Brak zdefiniowanej stałej OPENAI_API_KEY w wp-config.php.']);
     }    
 
-    $image_path = $_FILES['image']['tmp_name'];
-
-    $image_info = getimagesize($image_path);
-    error_log('Image Info');
-    error_log(print_r($image_info, true));
-
-    
-    $api_key = OPENAI_API_KEY;
+    image_path_original  = $_FILES['image']['tmp_name'];
+    $image_path = convert_image_to_openai_png($image_path_original);
     
     $ch = curl_init();
    
@@ -138,4 +132,39 @@ function intvizai_process() {
     update_user_meta($user_id, 'intvizai_count', $meta);
 
     wp_send_json_success(['image_base64' => $data['data'][0]['b64_json']]);
+}
+
+function convert_image_to_openai_png($input_path) {
+    $original = imagecreatefromstring(file_get_contents($input_path));
+
+    // Utwórz nowy obraz 1024x1024 z kanałem alfa
+    $converted = imagecreatetruecolor(1024, 1024);
+    imagesavealpha($converted, true);
+    $transparent = imagecolorallocatealpha($converted, 0, 0, 0, 127);
+    imagefill($converted, 0, 0, $transparent);
+
+    // Wyrównaj oryginał proporcjonalnie do 1024x1024
+    $src_width = imagesx($original);
+    $src_height = imagesy($original);
+    $dst_width = 1024;
+    $dst_height = 1024;
+
+    // Zachowanie proporcji
+    $ratio = min($dst_width / $src_width, $dst_height / $src_height);
+    $new_width = (int)($src_width * $ratio);
+    $new_height = (int)($src_height * $ratio);
+
+    $dst_x = (int)(($dst_width - $new_width) / 2);
+    $dst_y = (int)(($dst_height - $new_height) / 2);
+
+    imagecopyresampled($converted, $original, $dst_x, $dst_y, 0, 0, $new_width, $new_height, $src_width, $src_height);
+
+    // Zapisz do pliku tymczasowego
+    $tmp_path = tempnam(sys_get_temp_dir(), 'openai_') . '.png';
+    imagepng($converted, $tmp_path);
+
+    imagedestroy($original);
+    imagedestroy($converted);
+
+    return $tmp_path;
 }
