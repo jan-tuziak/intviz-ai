@@ -94,11 +94,12 @@ function intvizai_process() {
         ],
         CURLOPT_POSTFIELDS => [
             'image' => new CURLFile($image_path, 'image/png', 'image.png'),
-            'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
+            'prompt' => 'Generate a photorealistic visualization of the attached image. The result image should match the attached image exactly.',
             'n' => 1,
             'size' => '1024x1024',
             'response_format' => 'b64_json',
-            'model' => 'dall-e-2'
+            'model' => 'gpt-image-1',
+            'quality' => 'high'
         ],
         CURLOPT_TIMEOUT => 60,
     ];
