@@ -91,7 +91,7 @@ function intvizai_process() {
             'name' => 'image',
             'filename' => 'image.png',
             'type' => 'image/png',
-            'contents' => file_get_contents($image_path)
+            'contents' => fopen($image_path, 'r')
         ],
         [
             'name' => 'prompt',
