@@ -110,7 +110,7 @@ function intvizai_process() {
     $data = json_decode($response, true);
 
     if (!isset($data['data'][0]['b64_json'])) {
-        wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.', 'debug' => $data]);
+        wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.', 'debug' => $data, 'curl' => $ch]);
     }
 
     // Zwiększ licznik i zapisz
