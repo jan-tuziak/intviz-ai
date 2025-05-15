@@ -108,13 +108,7 @@ function intvizai_process() {
         'size' => '1024x1024'
     ]
     
-    $response = wp_remote_post('https://api.openai.com/v1/images/edits', array(
-        'method' => 'POST',
-        'headers' => $headers,
-        'httpversion' => '1.0',
-        'sslverify' => false,
-        'body' => json_encode($body))
-    ));
+    $response = wp_remote_post('https://api.openai.com/v1/images/edits', $req);
 
     if (is_wp_error($response)) {
         wp_send_json_error(['message' => 'Błąd połączenia z OpenAI. ' . print_r($body, true)]);
