@@ -54,22 +54,24 @@ add_action('wp_ajax_intvizai_process', 'intvizai_process');
 
 function intvizai_process() {
     $user_id = get_current_user_id();
-    $today = date('Y-m-d');
-
-    // Pobierz zapisany licznik
-    $meta = get_user_meta($user_id, 'intvizai_count', true);
-    $meta = is_array($meta) ? $meta : ['count' => 0, 'date' => $today];
-
-    // Jeśli data ≠ dziś, resetuj licznik
-    if ($meta['date'] !== $today) {
-        $meta['count'] = 0;
-        $meta['date'] = $today;
+    if (!current_user_can('manage_options')) {
+        $today = date('Y-m-d');
+    
+        // Pobierz zapisany licznik
+        $meta = get_user_meta($user_id, 'intvizai_count', true);
+        $meta = is_array($meta) ? $meta : ['count' => 0, 'date' => $today];
+    
+        // Jeśli data ≠ dziś, resetuj licznik
+        if ($meta['date'] !== $today) {
+            $meta['count'] = 0;
+            $meta['date'] = $today;
+        }
+    
+        if ($meta['count'] >= 2) {
+            wp_send_json_error(['message' => 'Osiągnąłeś dzienny limit 2 obrazów. Spróbuj jutro!']);
+        }
     }
-
-    if ($meta['count'] >= 2) {
-        wp_send_json_error(['message' => 'Osiągnąłeś dzienny limit 2 obrazów. Spróbuj jutro!']);
-    }
-
+    
     if (!isset($_FILES['image'])) {
         wp_send_json_error(['message' => 'Nie przesłano obrazu.']);
     }
@@ -124,10 +126,11 @@ function intvizai_process() {
         
         wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.', 'debug' => $data]);
     } else {
-        // Zwiększ licznik i zapisz
-        $meta['count'] += 1;
-        update_user_meta($user_id, 'intvizai_count', $meta);
-    
+        if (!current_user_can('manage_options')){   
+            $meta['count'] += 1;
+            update_user_meta($user_id, 'intvizai_count', $meta);
+        }
+        
         wp_send_json([
             'success' => true,
             'data' => [
