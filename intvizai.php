@@ -113,7 +113,7 @@ function intvizai_process() {
         'headers' => $headers,
         'httpversion' => '1.0',
         'sslverify' => false,
-        'body' => json_encode($body))   
+        'body' => json_encode($body)
     ));
 
     if (is_wp_error($response)) {
