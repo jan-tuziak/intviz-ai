@@ -82,53 +82,41 @@ function intvizai_process() {
 
     $image_path = $_FILES['image']['tmp_name'];
 
-    $req = [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $api_key,
-            'Content-Type' => 'multipart/form-data'
+    $ch = curl_init();
+
+    curl_setopt_array($ch, [
+        CURLOPT_URL => 'https://api.openai.com/v1/images/edits',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            "Authorization: Bearer $api_key"
         ],
-        'body' => [
+        CURLOPT_POSTFIELDS => [
             'image' => curl_file_create($image_path, 'image/png', 'image.png'),
-            'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
+            'prompt' => 'Make it hyper-realistic, suitable for interior design portfolio.',
             'n' => 1,
-            'size' => '1024x1024'
-        ],
-        'timeout' => 60
-    ];
+            'size' => '1024x1024',
+            'response_format' => 'b64_json'
+        ]
+    ]);
 
-    $headers = [
-        'Authorization' => 'Bearer ' . $api_key,
-        'Content-Type' => 'multipart/form-data'
-    ];
+    $response = curl_exec($ch);
+    $err = curl_error($ch);
+    curl_close($ch);
 
-    $body = [
-        'image' => curl_file_create($image_path, 'image/png', 'image.png'),
-        'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
-        'n' => 1,
-        'size' => '1024x1024'
-    ];
-    
-    $response = wp_remote_post('https://api.openai.com/v1/images/edits', array(
-        'method' => 'POST',
-        'headers' => $headers,
-        'httpversion' => '1.0',
-        'sslverify' => false,
-        'body' => json_encode($body)
-    ));
-
-    if (is_wp_error($response)) {
-        wp_send_json_error(['message' => 'Błąd połączenia z OpenAI. ' . print_r($body, true)]);
+    if ($err) {
+        wp_send_json_error(['message' => 'Błąd cURL: ' . $err]);
     }
+    
+    $data = json_decode($response, true);
 
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-
-    if (!isset($body['data'][0]['b64_json'])) {
-        wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.' . print_r($body, true)]);
+    if (!isset($data['data'][0]['b64_json'])) {
+        wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.', 'debug' => $data]);
     }
 
     // Zwiększ licznik i zapisz
     $meta['count'] += 1;
     update_user_meta($user_id, 'intvizai_count', $meta);
 
-    wp_send_json_success(['image_base64' => $body['data'][0]['b64_json']]);
+    wp_send_json_success(['image_base64' => $data['data'][0]['b64_json']]);
 }
