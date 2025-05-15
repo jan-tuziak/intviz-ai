@@ -100,7 +100,7 @@ function intvizai_process() {
             'model' => 'gpt-image-1',
             'quality' => 'high'
         ],
-        CURLOPT_TIMEOUT => 60,
+        CURLOPT_TIMEOUT => 300,
     ];
     
     curl_setopt_array($ch, $ch_options);
