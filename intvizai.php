@@ -124,19 +124,16 @@ function intvizai_process() {
         wp_send_json_error(['message' => 'Błąd połączenia', 'debug' => $response->get_error_message()]);
     }
 
-    error_log('OpenAI Request Headers:');
+    error_log('####################### OpenAI Request Headers: #######################');
     error_log(print_r($headers, true));
 
-    error_log('OpenAI Request Body:');
+    error_log('####################### OpenAI Request Body: #######################');
     error_log(print_r($body, true));
     
     $data = json_decode(wp_remote_retrieve_body($response), true);
 
-    error_log('OpenAI Response:');
+    error_log('####################### OpenAI Response: #######################');
     error_log(print_r($response, true));
-
-    error_log('OpenAI Response Body:');
-    error_log(print_r($data, true));
 
     if (!isset($data['data'][0]['b64_json'])) {
         wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.', 'debug' => $data]);
