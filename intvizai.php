@@ -81,6 +81,11 @@ function intvizai_process() {
     }    
 
     $image_path = $_FILES['image']['tmp_name'];
+
+    $image_info = getimagesize($image_path);
+    error_log('Image Info');
+    error_log(print_r($image_info, true));
+
     
     $api_key = OPENAI_API_KEY;
     
@@ -117,11 +122,11 @@ function intvizai_process() {
     $data = json_decode($response, true);
     
     if (!isset($data['data'][0]['b64_json'])) {
-        error_log('####################### OpenAI Request cURL Options: #######################');
-        error_log(print_r($ch_options, true));
+        // error_log('####################### OpenAI Request cURL Options: #######################');
+        // error_log(print_r($ch_options, true));
     
-        error_log('####################### OpenAI Response: #######################');
-        error_log(print_r($response, true));
+        // error_log('####################### OpenAI Response: #######################');
+        // error_log(print_r($response, true));
         
         wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.', 'debug' => $data]);
     }
