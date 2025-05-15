@@ -80,7 +80,7 @@ function intvizai_process() {
         wp_send_json_error(['message' => 'Brak zdefiniowanej stałej OPENAI_API_KEY w wp-config.php.']);
     }    
 
-    image_path_original  = $_FILES['image']['tmp_name'];
+    $image_path_original  = $_FILES['image']['tmp_name'];
     $image_path = convert_image_to_openai_png($image_path_original);
     
     $ch = curl_init();
