@@ -99,16 +99,22 @@ function intvizai_process() {
     $headers = [
         'Authorization' => 'Bearer ' . $api_key,
         'Content-Type' => 'multipart/form-data'
-    ]
+    ];
 
     $body = [
         'image' => curl_file_create($image_path, 'image/png', 'image.png'),
         'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
         'n' => 1,
         'size' => '1024x1024'
-    ]
+    ];
     
-    $response = wp_remote_post('https://api.openai.com/v1/images/edits', $req);
+    $response = wp_remote_post('https://api.openai.com/v1/images/edits', array(
+        'method' => 'POST',
+        'headers' => $headers,
+        'httpversion' => '1.0',
+        'sslverify' => false,
+        'body' => json_encode($body))   
+    ));
 
     if (is_wp_error($response)) {
         wp_send_json_error(['message' => 'Błąd połączenia z OpenAI. ' . print_r($body, true)]);
