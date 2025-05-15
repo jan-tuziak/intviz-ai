@@ -123,15 +123,14 @@ function intvizai_process() {
     if (is_wp_error($response)) {
         wp_send_json_error(['message' => 'Błąd połączenia', 'debug' => $response->get_error_message()]);
     }
-    
-    $body = wp_remote_retrieve_body($response);
-    $data = json_decode($body, true);
 
     error_log('OpenAI Request Headers:');
     error_log(print_r($headers, true));
 
     error_log('OpenAI Request Body:');
     error_log(print_r($body, true));
+    
+    $data = json_decode(wp_remote_retrieve_body($response), true);
 
     error_log('OpenAI Response:');
     error_log(print_r($response, true));
