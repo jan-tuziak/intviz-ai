@@ -36,10 +36,13 @@ function intvizai_shortcode() {
 
         const data = await res.json();
         if (data.success) {
+            const base64 = data.image_base64;
+            const dataUrl = `data:image/png;base64,${base64}`;
+            
             document.getElementById('intvizai-result').innerHTML = `
                 <p>Oto Twoje wygenerowane zdjęcie:</p>
-                <img src="data:image/png;base64,${data.image_base64}" style="max-width: 100%;">
-                <a href="data:image/png;base64,${data.image_base64}" download="intvizai_result.png">Pobierz obraz</a>
+                <img src="${dataUrl}" style="max-width: 100%;">
+                <a href="${dataUrl}" download="intvizai_result.png">Pobierz obraz</a>
             `;
         } else {
             document.getElementById('intvizai-result').textContent = 'Błąd: ' + data.data.message;
