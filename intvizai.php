@@ -123,15 +123,13 @@ function intvizai_process() {
         // error_log(print_r($response, true));
         
         wp_send_json_error(['message' => 'Brak obrazu w odpowiedzi API.', 'debug' => $data]);
-    }
+    } else {
+        // Zwiększ licznik i zapisz
+        $meta['count'] += 1;
+        update_user_meta($user_id, 'intvizai_count', $meta);
     
-    wp_send_json_success(['image_base64' => $data['data'][0]['b64_json']]);
-
-    // Zwiększ licznik i zapisz
-    $meta['count'] += 1;
-    update_user_meta($user_id, 'intvizai_count', $meta);
-
-    wp_send_json_success(['image_base64' => $data['data'][0]['b64_json']]);
+        wp_send_json_success(['image_base64' => $data['data'][0]['b64_json']]);
+    }
 }
 
 function convert_image_to_openai_png($input_path) {
