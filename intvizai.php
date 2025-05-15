@@ -82,53 +82,42 @@ function intvizai_process() {
 
     $image_path = $_FILES['image']['tmp_name'];
     
-    require_once ABSPATH . WPINC . '/class-requests.php'; // tylko jeśli poza WordPressem
-
     $api_key = OPENAI_API_KEY;
     
-    $body = [
-        [
-            'name' => 'image',
-            'filename' => 'image.png',
-            'type' => 'image/png',
-            'contents' => fopen($image_path, 'r')
+    $ch = curl_init();
+   
+    $ch_options = [
+        CURLOPT_URL => 'https://api.openai.com/v1/images/edits',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $api_key
         ],
-        [
-            'name' => 'prompt',
-            'contents' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.'
+        CURLOPT_POSTFIELDS => [
+            'image' => new CURLFile($image_path, 'image/png', 'image.png'),
+            'prompt' => 'Generate a photorealistic interior visualization. The output file should match exactly the input image.',
+            'n' => 1,
+            'size' => '1024x1024',
+            'response_format' => 'b64_json'
         ],
-        [
-            'name' => 'n',
-            'contents' => '1'
-        ],
-        [
-            'name' => 'size',
-            'contents' => '1024x1024'
-        ],
-        [
-            'name' => 'response_format',
-            'contents' => 'b64_json'
-        ]
+        CURLOPT_TIMEOUT => 60,
     ];
     
-    $response = Requests::request(
-        'https://api.openai.com/v1/images/edits',
-        [
-            'Authorization' => 'Bearer ' . $api_key
-        ],
-        $body,
-        'POST',
-        [
-            'type' => 'multipart',
-            'timeout' => 60
-        ]
-    );
+    curl_setopt_array($ch, $ch_options);
     
-    $data = json_decode($response->body, true);
+    $response = curl_exec($ch);
+    
+    if (curl_errno($ch)) {
+        wp_send_json_error(['message' => 'cURL error: ' . curl_error($ch)]);
+    }
+    
+    curl_close($ch);
+    
+    $data = json_decode($response, true);
     
     if (!isset($data['data'][0]['b64_json'])) {
-        error_log('####################### OpenAI Request Body: #######################');
-        error_log(print_r($body, true));
+        error_log('####################### OpenAI Request cURL Options: #######################');
+        error_log(print_r($ch_options, true));
     
         error_log('####################### OpenAI Response: #######################');
         error_log(print_r($response, true));
